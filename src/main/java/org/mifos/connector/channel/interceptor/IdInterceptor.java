@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.mifos.connector.channel.camel.routes.ChannelRouteBuilder;
+import org.mifos.connector.channel.config.ChannelRedisProperties;
 import org.mifos.connector.common.channel.dto.PhErrorDTO;
 import org.mifos.connector.common.exception.PaymentHubError;
 import org.mifos.connector.common.exception.PaymentHubErrorCategory;
@@ -36,25 +37,24 @@ public class IdInterceptor implements HandlerInterceptor {
     @Autowired
     ChannelRouteBuilder channelRouteBuilder;
 
-    @Value("${redis.idempotency.enabled}")
-    Boolean redisIdempotencyEnabled;
+    private final Boolean redisIdempotencyEnabled;
 
     @Value("${redis.idempotency.apiList}.split(',')")
     private Set<String> apiList;
 
-    @Value("${redis.idempotency.keyFormat}")
-    String keyFormat;
+    private final String keyFormat;
 
-    @Value("${redis.cacheRetencyDuration}")
-    long cacheRetencyDuration;
+    private final long cacheRetencyDuration;
 
     @Autowired
     public RedisTemplate<String, String> redisTemplate;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    IdInterceptor(Set<String> apiList) {
-        this.apiList = apiList;
+    IdInterceptor(ChannelRedisProperties redisProperties) {
+        this.redisIdempotencyEnabled = redisProperties.idempotency().enabled();
+        this.keyFormat = redisProperties.idempotency().keyFormat();
+        this.cacheRetencyDuration = redisProperties.cacheRetencyDuration();
     }
 
     @Override

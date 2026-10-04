@@ -24,6 +24,8 @@ import org.apache.camel.component.bean.validator.BeanValidationException;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mifos.connector.channel.config.BpmnFlowProperties;
+import org.mifos.connector.channel.config.DestinationProperties;
 import org.mifos.connector.channel.properties.TenantImplementation;
 import org.mifos.connector.channel.properties.TenantImplementationProperties;
 import org.mifos.connector.channel.zeebe.ZeebeProcessStarter;
@@ -67,27 +69,22 @@ public class GSMAChannelRouteBuilder extends ErrorHandlerRouteBuilder {
     @Autowired
     TenantImplementationProperties tenantImplementationProperties;
 
-    public GSMAChannelRouteBuilder(@Value("#{'${dfspids}'.split(',')}") List<String> dfspIds,
-            @Value("${bpmn.flows.gsma-base-transaction}") String baseTransaction,
-            @Value("${bpmn.flows.gsma-int-transfer}") String intTransfer, @Value("${bpmn.flows.gsma-payee-process}") String payeeProcess,
-            @Value("${bpmn.flows.gsma-bill-payment}") String billPayment,
-            @Value("${bpmn.flows.gsma-link-based-payment}") String linkBasedPayment, @Value("${destination.dfspid}") String payeeDfspid,
-            @Value("${bpmn.flows.international-remittance-payee}") String internationalRemittancePayee,
-            @Value("${bpmn.flows.international-remittance-payer}") String internationalRemittancePayer, ZeebeClient zeebeClient,
-            ZeebeProcessStarter zeebeProcessStarter, ObjectMapper objectMapper) {
+    public GSMAChannelRouteBuilder(@Value("#{'${dfspids}'.split(',')}") List<String> dfspIds, BpmnFlowProperties bpmnFlows,
+            DestinationProperties destination, ZeebeClient zeebeClient, ZeebeProcessStarter zeebeProcessStarter,
+            ObjectMapper objectMapper) {
         super.configure();
-        this.baseTransaction = baseTransaction;
-        this.intTransfer = intTransfer;
-        this.payeeProcess = payeeProcess;
-        this.billPayment = billPayment;
-        this.linkBasedPayment = linkBasedPayment;
-        this.internationalRemittancePayee = internationalRemittancePayee;
-        this.internationalRemittancePayer = internationalRemittancePayer;
+        this.baseTransaction = bpmnFlows.gsmaBaseTransaction();
+        this.intTransfer = bpmnFlows.gsmaIntTransfer();
+        this.payeeProcess = bpmnFlows.gsmaPayeeProcess();
+        this.billPayment = bpmnFlows.gsmaBillPayment();
+        this.linkBasedPayment = bpmnFlows.gsmaLinkBasedPayment();
+        this.internationalRemittancePayee = bpmnFlows.internationalRemittancePayee();
+        this.internationalRemittancePayer = bpmnFlows.internationalRemittancePayer();
         this.zeebeProcessStarter = zeebeProcessStarter;
         this.zeebeClient = zeebeClient;
         this.dfspIds = dfspIds;
         this.objectMapper = objectMapper;
-        this.payeeDfspid = payeeDfspid;
+        this.payeeDfspid = destination.dfspid();
     }
 
     @Override

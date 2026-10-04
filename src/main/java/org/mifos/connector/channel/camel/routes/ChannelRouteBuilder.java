@@ -50,6 +50,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mifos.connector.channel.camel.config.Client;
 import org.mifos.connector.channel.camel.config.ClientProperties;
+import org.mifos.connector.channel.config.BpmnFlowProperties;
+import org.mifos.connector.channel.config.DestinationProperties;
+import org.mifos.connector.channel.config.MpesaNotificationProperties;
+import org.mifos.connector.channel.config.OperationsProperties;
+import org.mifos.connector.channel.config.RestAuthorizationProperties;
 import org.mifos.connector.channel.gsma_api.GsmaP2PResponseDto;
 import org.mifos.connector.channel.model.OpsTxnResponseDTO;
 import org.mifos.connector.channel.model.ValidationResponseDTO;
@@ -117,45 +122,35 @@ public class ChannelRouteBuilder extends ErrorHandlerRouteBuilder {
     private String restAuthHeader;
     String destinationDfspId;
 
-    public ChannelRouteBuilder(@Value("#{'${dfspids}'.split(',')}") List<String> dfspIds,
-            @Value("${bpmn.flows.payment-transfer}") String paymentTransferFlow,
-            @Value("${bpmn.flows.special-payment-transfer}") String specialPaymentTransferFlow,
-            @Value("${bpmn.flows.transaction-request}") String transactionRequestFlow,
-            @Value("${bpmn.flows.party-registration}") String partyRegistration,
-            @Value("${bpmn.flows.inboundTransactionReq-flow}") String inboundTransactionReqFlow,
-            @Value("${rest.authorization.host}") String restAuthHost, @Value("${operations.url}") String operationsUrl,
-            @Value("${operations.auth-enabled}") Boolean operationsAuthEnabled,
-            @Value("${operations.endpoint.transfers}") String transfersEndpoint,
-            @Value("${operations.endpoint.transactionReq}") String transactionEndpoint,
-            @Value("${mpesa.notification.success.enabled}") Boolean isNotificationSuccessServiceEnabled,
-            @Value("${mpesa.notification.failure.enabled}") Boolean isNotificationFailureServiceEnabled, @Value("${timer}") String timer,
-            @Value("${rest.authorization.header}") String restAuthHeader, @Value("${destination.dfspid}") String destinationDfspId,
-            ZeebeClient zeebeClient, ZeebeProcessStarter zeebeProcessStarter, @Autowired(required = false) AuthProcessor authProcessor,
+    public ChannelRouteBuilder(@Value("#{'${dfspids}'.split(',')}") List<String> dfspIds, BpmnFlowProperties bpmnFlows,
+            OperationsProperties operations, RestAuthorizationProperties restAuthorization, MpesaNotificationProperties mpesaNotification,
+            DestinationProperties destination, @Value("${timer}") String timer, ZeebeClient zeebeClient,
+            ZeebeProcessStarter zeebeProcessStarter, @Autowired(required = false) AuthProcessor authProcessor,
             @Autowired(required = false) AuthProperties authProperties, ObjectMapper objectMapper, ClientProperties clientProperties,
             RestTemplate restTemplate) {
         super(authProcessor, authProperties);
         super.configure();
-        this.paymentTransferFlow = paymentTransferFlow;
-        this.specialPaymentTransferFlow = specialPaymentTransferFlow;
-        this.transactionRequestFlow = transactionRequestFlow;
-        this.inboundTransactionReqFlow = inboundTransactionReqFlow;
-        this.partyRegistration = partyRegistration;
+        this.paymentTransferFlow = bpmnFlows.paymentTransfer();
+        this.specialPaymentTransferFlow = bpmnFlows.specialPaymentTransfer();
+        this.transactionRequestFlow = bpmnFlows.transactionRequest();
+        this.inboundTransactionReqFlow = bpmnFlows.inboundTransactionReqFlow();
+        this.partyRegistration = bpmnFlows.partyRegistration();
         this.zeebeProcessStarter = zeebeProcessStarter;
         this.zeebeClient = zeebeClient;
         this.dfspIds = dfspIds;
         this.objectMapper = objectMapper;
         this.clientProperties = clientProperties;
         this.restTemplate = restTemplate;
-        this.restAuthHost = restAuthHost;
-        this.operationsUrl = operationsUrl;
-        this.transfersEndpoint = transfersEndpoint;
-        this.transactionEndpoint = transactionEndpoint;
-        this.isNotificationSuccessServiceEnabled = isNotificationSuccessServiceEnabled;
-        this.isNotificationFailureServiceEnabled = isNotificationFailureServiceEnabled;
+        this.restAuthHost = restAuthorization.host();
+        this.operationsUrl = operations.url();
+        this.transfersEndpoint = operations.endpoint().transfers();
+        this.transactionEndpoint = operations.endpoint().transactionReq();
+        this.isNotificationSuccessServiceEnabled = mpesaNotification.success().enabled();
+        this.isNotificationFailureServiceEnabled = mpesaNotification.failure().enabled();
         this.timer = timer;
-        this.restAuthHeader = restAuthHeader;
-        this.operationsAuthEnabled = operationsAuthEnabled;
-        this.destinationDfspId = destinationDfspId;
+        this.restAuthHeader = restAuthorization.header();
+        this.operationsAuthEnabled = operations.authEnabled();
+        this.destinationDfspId = destination.dfspid();
     }
 
     @Override

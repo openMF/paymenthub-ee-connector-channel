@@ -27,6 +27,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.support.DefaultExchange;
 import org.json.JSONObject;
+import org.mifos.connector.channel.config.ZeebeProperties;
 import org.mifos.connector.channel.utils.Headers;
 import org.mifos.connector.channel.utils.SpringWrapperUtil;
 import org.mifos.connector.common.channel.dto.TransactionChannelRequestDTO;
@@ -37,7 +38,6 @@ import org.mifos.connector.common.mojaloop.type.IdentifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -56,13 +56,16 @@ public class ZeebeWorkers {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("${zeebe.client.evenly-allocated-max-jobs}")
-    private int workerMaxJobs;
+    private final int workerMaxJobs;
 
     public static final String TRANSFER_FAILED = "transferFailed";
     public static final String TRANSFER_STATE = "transferState";
 
     public static final String MESSAGE = "message";
+
+    public ZeebeWorkers(ZeebeProperties zeebeProperties) {
+        this.workerMaxJobs = zeebeProperties.client().evenlyAllocatedMaxJobs();
+    }
 
     @PostConstruct
     public void setupWorkers() {

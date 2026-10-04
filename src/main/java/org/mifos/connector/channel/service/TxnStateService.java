@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import org.mifos.connector.channel.camel.config.Client;
 import org.mifos.connector.channel.camel.config.ClientProperties;
 import org.mifos.connector.channel.camel.routes.ChannelRouteBuilder;
+import org.mifos.connector.channel.config.OperationsProperties;
 import org.mifos.connector.channel.model.OpsTxnResponseDTO;
 import org.mifos.connector.channel.model.TxnStateResponseDTO;
 import org.mifos.connector.channel.utils.Constants;
@@ -34,9 +35,12 @@ public class TxnStateService {
     private ClientProperties clientProperties;
     @Value("#{'${dfspids}'.split(',')}")
     private List<String> dfspIds;
-    @Value("${operations.auth-enabled}")
-    private Boolean operationsAuthEnabled;
+    private final Boolean operationsAuthEnabled;
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    public TxnStateService(OperationsProperties operations) {
+        this.operationsAuthEnabled = operations.authEnabled();
+    }
 
     public TxnStateResponseDTO getTxnState(Headers headers, String correlationId, String requestType) throws JsonProcessingException {
         String tenantId = (String) headers.get(Constants.PLATFORM_TENANT_ID);

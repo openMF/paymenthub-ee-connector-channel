@@ -26,6 +26,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.support.DefaultExchange;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifos.connector.channel.config.ZeebeProperties;
 import org.mifos.connector.channel.utils.Headers;
@@ -88,18 +89,38 @@ public class ZeebeWorkers {
 
             Object errorInfoVariable = job.getVariablesAsMap().get(ERROR_INFORMATION);
             if (errorInfoVariable != null) {
-                JSONObject errorInformation = new JSONObject((String) errorInfoVariable).getJSONObject("errorInformation");
-                int errorCode = Integer.parseInt(errorInformation.getString("errorCode"));
-                logger.error("Error occurred with code: {} type: {} message: {}", errorCode, fromCode(errorCode).name(),
-                        errorInformation.getString("errorDescription"));
+                logger.error("Error occurred: {}", describeErrorInformation(errorInfoVariable));
             }
 
             Map<String, Object> existingVariables = job.getVariablesAsMap();
 
-            existingVariables.put(TRANSFER_CREATE_FAILED, "false");
+            existingVariables.put(TRANSFER_CREATE_FAILED, false);
 
             client.newCompleteCommand(job.getKey()).variables(existingVariables).send();
         }).name("send-error-to-channel").maxJobsActive(workerMaxJobs).open();
+    }
+
+    /**
+     * Describes the errorInformation variable for logging. Connectors set it either to a Mojaloop error document
+     * ({"errorInformation":{"errorCode":..,"errorDescription":..}}) or to plain text, e.g. ams-mifosx on a Fineract
+     * failure. Anything that is not the Mojaloop form is returned as-is, so logging the error can never fail the job.
+     */
+    static String describeErrorInformation(Object errorInfoVariable) {
+        String raw = String.valueOf(errorInfoVariable);
+        try {
+            JSONObject errorInformation = new JSONObject(raw).getJSONObject("errorInformation");
+            String errorCode = errorInformation.optString("errorCode");
+            String errorDescription = errorInformation.optString("errorDescription");
+            String errorType;
+            try {
+                errorType = fromCode(Integer.parseInt(errorCode)).name();
+            } catch (RuntimeException e) {
+                errorType = "UNKNOWN";
+            }
+            return String.format("code: %s type: %s message: %s", errorCode, errorType, errorDescription);
+        } catch (JSONException e) {
+            return raw;
+        }
     }
 
     private void callTransferRoute() {

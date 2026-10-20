@@ -76,6 +76,7 @@ class ShippedConfigBindsTest {
         withShippedYaml().withUserConfiguration(AllRecords.class).run(context -> {
             assertThat(context).hasNotFailed();
             assertThat(context.getBean(BpmnFlowProperties.class).paymentTransfer()).isEqualTo("PayerFundTransfer-{dfspid}");
+            assertThat(context.getBean(BpmnFlowProperties.class).specialPayerPrefix()).isEqualTo("6666");
             assertThat(context.getBean(ConnectorCamelProperties.class).serverPort()).isEqualTo(5000);
             assertThat(context.getBean(DestinationProperties.class).dfspid()).isEqualTo("greenbank");
             assertThat(context.getBean(MpesaNotificationProperties.class).success().enabled()).isFalse();

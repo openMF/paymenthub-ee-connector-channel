@@ -39,7 +39,10 @@ public class IdInterceptor implements HandlerInterceptor {
 
     private final Boolean redisIdempotencyEnabled;
 
-    @Value("${redis.idempotency.apiList}.split(',')")
+    // Spring splits a comma-separated value into the Set (and trims each entry). The previous
+    // "${redis.idempotency.apiList}.split(',')" appended the literal text ".split(',')" to the value, so the last
+    // API in the list never matched.
+    @Value("${redis.idempotency.apiList}")
     private Set<String> apiList;
 
     private final String keyFormat;
@@ -77,7 +80,7 @@ public class IdInterceptor implements HandlerInterceptor {
     private boolean checkIdempotency(HttpServletRequest request, HttpServletResponse response) {
         PhErrorDTO errorDTO = null;
         String correlationId = request.getHeader(CLIENTCORRELATIONID);
-        if (correlationId.isBlank()) {
+        if (StringUtils.isBlank(correlationId)) {
             logger.debug("X-CorrelationID is missing,attaching error dto to response");
             errorDTO = new PhErrorDTO.PhErrorDTOBuilder(PaymentHubError.MandatoryValueNotSupplied)
                     .addErrorParameter(CLIENTCORRELATIONID, "X-CorrelationID")

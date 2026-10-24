@@ -15,6 +15,9 @@ import org.springframework.validation.annotation.Validated;
  *            the payer fund transfer flow
  * @param specialPaymentTransfer
  *            the special payer fund transfer flow
+ * @param specialPayerPrefix
+ *            payers whose identifier starts with this prefix are sent to {@code specialPaymentTransfer} instead of
+ *            {@code paymentTransfer}, a test hook; blank disables it
  * @param transactionRequest
  *            the payee transaction request flow
  * @param partyRegistration
@@ -40,8 +43,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "bpmn.flows")
 public record BpmnFlowProperties(@NotNull String paymentTransfer, @NotNull String specialPaymentTransfer,
-        @NotNull String transactionRequest, @NotNull String partyRegistration, @NotNull String inboundTransactionReqFlow,
-        @NotNull String gsmaBaseTransaction, @NotNull String gsmaIntTransfer, @NotNull String gsmaPayeeProcess,
-        @NotNull String gsmaBillPayment, @NotNull String gsmaLinkBasedPayment, @NotNull String internationalRemittancePayee,
-        @NotNull String internationalRemittancePayer) {
+        @NotNull String specialPayerPrefix, @NotNull String transactionRequest, @NotNull String partyRegistration,
+        @NotNull String inboundTransactionReqFlow, @NotNull String gsmaBaseTransaction, @NotNull String gsmaIntTransfer,
+        @NotNull String gsmaPayeeProcess, @NotNull String gsmaBillPayment, @NotNull String gsmaLinkBasedPayment,
+        @NotNull String internationalRemittancePayee, @NotNull String internationalRemittancePayer) {
 }

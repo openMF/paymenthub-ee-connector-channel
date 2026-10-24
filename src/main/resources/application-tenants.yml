@@ -5,7 +5,7 @@ bpmns:
         payment-transfer: "PayerFundTransfer-{dfspid}"  # Mojaloop routing for GovStack G2P
     - id: "bluebank"
       flows:
-        payment-transfer: "minimal_mock_fund_transfer-{dfspid}"  # Direct Fineract for closedloop
+        payment-transfer: "minimal_mock_fund_transfer-{dfspid}"  # closedloop via the mock payment scheme (no Fineract)
     - id: "lion"
       flows:
         payment-transfer: "minimal_mock_fund_transfer-{dfspid}"

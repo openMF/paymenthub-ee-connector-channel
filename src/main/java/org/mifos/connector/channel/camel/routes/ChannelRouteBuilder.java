@@ -102,6 +102,7 @@ public class ChannelRouteBuilder extends ErrorHandlerRouteBuilder {
 
     private String paymentTransferFlow;
     private String specialPaymentTransferFlow;
+    private String specialPayerPrefix;
     private String transactionRequestFlow;
     private String partyRegistration;
     private String inboundTransactionReqFlow;
@@ -132,6 +133,7 @@ public class ChannelRouteBuilder extends ErrorHandlerRouteBuilder {
         super.configure();
         this.paymentTransferFlow = bpmnFlows.paymentTransfer();
         this.specialPaymentTransferFlow = bpmnFlows.specialPaymentTransfer();
+        this.specialPayerPrefix = bpmnFlows.specialPayerPrefix();
         this.transactionRequestFlow = bpmnFlows.transactionRequest();
         this.inboundTransactionReqFlow = bpmnFlows.inboundTransactionReqFlow();
         this.partyRegistration = bpmnFlows.partyRegistration();
@@ -344,7 +346,8 @@ public class ChannelRouteBuilder extends ErrorHandlerRouteBuilder {
                     extraVariables.put("destinationFspId", channelRequest.getPayee().getPartyIdInfo().getFspId());
                     String tenantSpecificBpmn;
                     String bpmn = getWorkflowForTenant(tenantId, "payment-transfer");
-                    if (channelRequest.getPayer().getPartyIdInfo().getPartyIdentifier().startsWith("6666")) {
+                    if (!specialPayerPrefix.isBlank()
+                            && channelRequest.getPayer().getPartyIdInfo().getPartyIdentifier().startsWith(specialPayerPrefix)) {
                         tenantSpecificBpmn = bpmn.equals("default") ? specialPaymentTransferFlow.replace("{dfspid}", tenantId)
                                 : bpmn.replace("{dfspid}", tenantId);
                         extraVariables.put("specialTermination", true);

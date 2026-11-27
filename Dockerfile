@@ -1,6 +1,5 @@
 FROM eclipse-temurin:21-jre
 EXPOSE 8080
 
-# Copy only the bootable JAR, not the -plain.jar
-COPY build/libs/paymenthub-ee-connector-channel-*.jar app.jar
-CMD java -jar app.jar
+COPY build/libs/app.jar app.jar
+CMD ["java", "-jar", "app.jar"]

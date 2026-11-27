@@ -332,3 +332,7 @@ publishing {
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
+
+bootJar {
+    archiveFileName = 'app.jar'
+}
